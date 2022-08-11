@@ -1,12 +1,6 @@
 // console.log('This is a postmaster clone project')
 var paramCount = 0;
 
-// function stringToDom(string){
-//     let div = document.createElement('div');
-//     div.innerHTML(string);
-        
-// } 
-
 // initially, we have dont have to display custom parameters box because JSON is default, so, doing that:
 document.getElementById('parametersBox').style.display = 'none';
 
