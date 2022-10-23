@@ -1,6 +1,11 @@
-// console.log('This is a postmaster clone project')
 var paramCount = 0;
 
+// function stringToDom(string){
+//     let div = document.createElement('div');
+//     div.innerHTML(string);
+        
+// } 
+let entered = false;
 // initially, we have dont have to display custom parameters box because JSON is default, so, doing that:
 document.getElementById('parametersBox').style.display = 'none';
 
@@ -48,56 +53,78 @@ addBtn.addEventListener('click', (e)=>{
     paramCount++;
 })
 
+const submitRequest = (e) => {
+    if(!entered){
+        e.preventDefault()
+    }
+        let url = document.getElementById('url').value;
+        let requestType = document.querySelector('input[name=requestType]:checked').value;
+        document.getElementById('responsePrism').innerHTML = 'Please Wait.. Fetching Results... ';
+        
 
+
+        if (requestType == 'GET'){
+            fetch(url, { method: 'GET' })
+            .then(response => response.text()).then((text) =>{
+                document.getElementById('responsePrism').innerHTML = text;
+                Prism.highlightAll();
+            });
+        }
+    
+    
+        if (requestType == 'POST'){
+            let contentType = document.querySelector('input[name=contentType]:checked').value;
+            if (contentType == 'params'){
+                let data = {};
+                for (let i=0; i<paramCount+1; i++){
+                    if(document.getElementById('parameterKey' + (i + 1)) != undefined){
+                        let key = document.getElementById('parameterKey' + (i + 1)).value;
+                        let value = document.getElementById('parameterValue' + (i + 1)).value
+                        data[key] = value;
+                    }
+                }
+                data = JSON.stringify(data);
+            }
+            else {
+                data = document.getElementById('requestJsonText').value;
+            }
+            fetch (url, {
+                method: 'POST',
+                body: data,
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            }).then(response => response.text)
+            .then((text)=>{
+                document.getElementById('responsePrism').innerHTML = text;
+                Prism.highlightAll();
+            })
+        }
+}
 
 
 // When Submit button is clicked:
 let send = document.getElementById('submit');
-send.addEventListener('click', (e)=>{
-    e.preventDefault()
-    let url = document.getElementById('url').value;
-    let requestType = document.querySelector('input[name=requestType]:checked').value;
-    document.getElementById('responsePrism').innerHTML = 'Please Wait.. Fetching Results... ';
-    
-    
+send.addEventListener('click', submitRequest);
 
-    if (requestType == 'GET'){
-        fetch(url, {
-            method: 'GET',
-        }).then(response => response.text()).then((text) =>{
-            document.getElementById('responsePrism').innerHTML = text;
-            Prism.highlightAll();
-        });
+
+// Submit event should also run if user presses enter on the keyboard on the url and request JSON input
+let urlBtn = document.getElementById('url');
+let requestJsonText = document.getElementById('requestJsonText');
+url.addEventListener('keyup', (event) => {
+    if(event.key == "Enter"){
+
+        entered = true;
+        submitRequest();
+        entered = false;
+
     }
+})
 
-
-    if (requestType == 'POST'){
-        let contentType = document.querySelector('input[name=contentType]:checked').value;
-        if (contentType == 'params'){
-            let data = {};
-            for (let i=0; i<paramCount+1; i++){
-                if(document.getElementById('parameterKey' + (i + 1)) != undefined){
-                    let key = document.getElementById('parameterKey' + (i + 1)).value;
-                    let value = document.getElementById('parameterValue' + (i + 1)).value
-                    data[key] = value;
-                }
-            }
-            data = JSON.stringify(data);
-        }
-        else {
-            data = document.getElementById('requestJsonText').value;
-        }
-        fetch (url, {
-            method: 'POST',
-            body: data,
-            headers: {
-                "Content-type": "application/json; charset=UTF-8"
-            }
-        }).then(response => response.text)
-        .then((text)=>{
-            document.getElementById('responsePrism').innerHTML = text;
-            Prism.highlightAll();
-        })
+requestJsonText.addEventListener('keyup', (event)=>{
+    if(event.key == "Enter"){
+        entered = true;
+        submitRequest();
+        entered = false;
     }
-
 })
